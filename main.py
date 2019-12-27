@@ -73,16 +73,21 @@ def process_file(filename):
     rename_file(src + '''\\''' + filename, new_name)
 
 
+def handle_errors(src):
+    previous_dir = os.getcwd();
+    os.chdir(src)
+    if len(os.listdir()) <= 0:
+        print("Error: Could not find any files inside \'", src, "\' directory")
+        exit(-1)
+    os.chdir(previous_dir)
+
+
 if __name__ == "__main__":
     mkdirs()  # create directories that will be supported
-    create_test_files(src)  # Make test files
-
-    if len(os.listdir()) <= 0:
-        print("Error: Could not find any files inside ", src, " directory")
+    handle_errors(src)
+    # create_test_files(src)  # Make test files
 
     os.chdir(src)
 
     for filename in os.listdir():
         process_file(filename)  # send file to appropriate sub folder
-
-
