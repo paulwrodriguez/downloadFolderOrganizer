@@ -55,6 +55,7 @@ def create_test_files(src):
     Path(src + '''\\exe.exe''').touch()
     Path(src + '''\\zip.zip''').touch()
 
+
 def process_file(filename):
     basename = ntpath.basename(filename)
 
