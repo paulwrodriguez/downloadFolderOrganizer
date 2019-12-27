@@ -2,15 +2,10 @@ import os
 import time
 import ntpath
 import threading
-from watchdog.observers import Observer
-from watchdog.events import PatternMatchingEventHandler
+from pathlib import Path
 
 src = "C:\\Users\\Paul\\Desktop\\Cerebro\\temp\\src\\downloads"
 des = "C:\\Users\\Paul\\Desktop\\Cerebro\\temp\\dest"
-
-
-def on_deleted(event):
-    print(f"what the f**k! Someone deleted {event.src_path}!")
 
 
 def rename_file_helper(src_path, des_path, tries, max_tries, sleep_time):
@@ -43,54 +38,56 @@ def rename_file(src_path, des_path):
     rename_file_helper(src_path, des_path, tries, max_tries, sleep_time)
 
 
-def on_modified(event):
-    print("event:", event.event_type, " src:", event.src_path)
-    basename = ntpath.basename(event.src_path)
-
-    if event.src_path.endswith('.txt'):
-        new_name = des + '''\\txt\\''' + basename
-    elif event.src_path.endswith('.exe'):
-        new_name = des + '''\\exe\\''' + basename
-    elif event.src_path.endswith('.pdf'):
-        new_name = des + '''\\pdf\\''' + basename
-    elif event.src_path.endswith('.zip'):
-        new_name = des + '''\\zip\\''' + basename
-    else:
-        return
-
-    rename_file(event.src_path, new_name)
-
-
-def init():
+def mkdirs():
     os.makedirs(des + "\\txt", exist_ok=True)
     os.makedirs(des + "\\exe", exist_ok=True)
     os.makedirs(des + "\\pdf", exist_ok=True)
     os.makedirs(des + "\\zip", exist_ok=True)
 
 
+def create_test_files(src):
+    fd = open(src + "\\text.txt", "w+")
+    fd.write("hello world")
+    fd.close()
+
+    Path(src + '''\\text.txt''').touch()
+    Path(src + '''\\pdf.pdf''').touch()
+    Path(src + '''\\exe.exe''').touch()
+    Path(src + '''\\zip.zip''').touch()
+
+
+def process_file(filename):
+    basename = ntpath.basename(filename)
+
+    if filename.endswith('.txt'):
+        new_name = des + '''\\txt\\''' + basename
+    elif filename.endswith('.exe'):
+        new_name = des + '''\\exe\\''' + basename
+    elif filename.endswith('.pdf'):
+        new_name = des + '''\\pdf\\''' + basename
+    elif filename.endswith('.zip'):
+        new_name = des + '''\\zip\\''' + basename
+    else:
+        return
+
+    rename_file(src + '''\\''' + filename, new_name)
+
+
+def handle_errors(src):
+    previous_dir = os.getcwd();
+    os.chdir(src)
+    if len(os.listdir()) <= 0:
+        print("Error: Could not find any files inside \'", src, "\' directory")
+        exit(-1)
+    os.chdir(previous_dir)
+
+
 if __name__ == "__main__":
-    init()
-    patterns = "*"
-    ignore_patterns = ""
-    ignore_directories = False
-    case_sensitive = True
-    my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+    mkdirs()  # create directories that will be supported
+    handle_errors(src)
+    # create_test_files(src)  # Make test files
 
-    my_event_handler.on_created = on_modified
-    # my_event_handler.on_deleted = on_deleted
-    my_event_handler.on_modified = on_modified
-    # my_event_handler.on_moved = on_moved
+    os.chdir(src)
 
-    path = src
-    go_recursively = True
-    my_observer = Observer()
-    my_observer.schedule(my_event_handler, path, go_recursively)
-
-    my_observer.start()
-    print("Monitoring directory:", src)
-    try:
-        while True:
-            time.sleep(5)
-    except KeyboardInterrupt:
-        my_observer.stop()
-        my_observer.join()
+    for filename in os.listdir():
+        process_file(filename)  # send file to appropriate sub folder
