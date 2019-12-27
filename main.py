@@ -19,7 +19,6 @@ def rename_file_helper(src_path, des_path, tries, max_tries, sleep_time):
     tries = tries + 1
 
     try:
-        print("rename - Thread: ", str(threading.get_native_id()))
         os.rename(src_path, des_path)
         print("Moved ", src_path, " to ", des_path)
     except PermissionError as error:
@@ -45,7 +44,7 @@ def rename_file(src_path, des_path):
 
 
 def on_modified(event):
-    print("event name = ", event.event_type);
+    print("event:", event.event_type, " src:", event.src_path)
     basename = ntpath.basename(event.src_path)
 
     if event.src_path.endswith('.txt'):
@@ -56,6 +55,8 @@ def on_modified(event):
         new_name = des + '''\\pdf\\''' + basename
     elif event.src_path.endswith('.zip'):
         new_name = des + '''\\zip\\''' + basename
+    else:
+        return
 
     rename_file(event.src_path, new_name)
 
@@ -83,13 +84,13 @@ if __name__ == "__main__":
     path = src
     go_recursively = True
     my_observer = Observer()
-    my_observer.schedule(my_event_handler, path, recursive=go_recursively)
+    my_observer.schedule(my_event_handler, path, go_recursively)
 
     my_observer.start()
     print("Monitoring directory:", src)
     try:
         while True:
-            time.sleep(3)
+            time.sleep(5)
     except KeyboardInterrupt:
         my_observer.stop()
         my_observer.join()
