@@ -4,9 +4,6 @@ import ntpath
 import threading
 from pathlib import Path
 
-src = "C:\\Users\\Paul\\Desktop\\Cerebro\\temp\\src\\downloads"
-des = "C:\\Users\\Paul\\Desktop\\Cerebro\\temp\\dest"
-
 
 def rename_file_helper(src_path, des_path, tries, max_tries, sleep_time):
     if tries >= max_tries:
@@ -46,10 +43,6 @@ def mkdirs():
 
 
 def create_test_files(src):
-    fd = open(src + "\\text.txt", "w+")
-    fd.write("hello world")
-    fd.close()
-
     Path(src + '''\\text.txt''').touch()
     Path(src + '''\\pdf.pdf''').touch()
     Path(src + '''\\exe.exe''').touch()
@@ -83,9 +76,12 @@ def handle_errors(src):
 
 
 if __name__ == "__main__":
+    src = "C:\\Users\\Paul\\Desktop\\Cerebro\\temp\\src\\downloads"
+    des = "C:\\Users\\Paul\\Desktop\\Cerebro\\temp\\dest"
+
     mkdirs()  # create directories that will be supported
-    handle_errors(src)
     # create_test_files(src)  # Make test files
+    handle_errors(src)
 
     os.chdir(src)
 
