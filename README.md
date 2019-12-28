@@ -7,7 +7,7 @@ Requirements:
   2) Update 'des' vairable within main.py
 
 Supported file types:
-  1) .txt
-  2) .pdf
-  3) .exe
-  4) .zip
+  a) .txt
+  b) .pdf
+  c) .exe
+  d) .zip
